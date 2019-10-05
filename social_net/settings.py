@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # Own
     'apps.authentication',
     'apps.profiles',
+    'apps.posts',
 ]
 
 MIDDLEWARE = [
