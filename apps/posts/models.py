@@ -42,7 +42,7 @@ class Like(models.Model):
         ordering = ["-updated"]
         db_table = "likes"
         constraints = [
-            models.UniqueConstraint(fields=['post', 'user'], name='post_user_unq')
+            models.UniqueConstraint(fields=['post', 'profile'], name='post_profile_unq')
         ]
         indexes = [
             models.Index(fields=['updated'], name='updated_like_idx'),
