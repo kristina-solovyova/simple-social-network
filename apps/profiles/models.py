@@ -13,7 +13,8 @@ class Profile(models.Model):
     following = models.ManyToManyField(
         'self',
         related_name='followers',
-        symmetrical=False
+        symmetrical=False,
+        db_table='followings'
     )
     location = models.CharField(blank=True, max_length=255)
     timeZone = models.CharField(blank=True, max_length=127)
