@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import (
     AbstractBaseUser, BaseUserManager, PermissionsMixin
 )
+from .api_services.emailhunter.validator import validate_email
 
 
 class UserManager(BaseUserManager):
@@ -39,7 +40,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractBaseUser, PermissionsMixin):
 
-    email = models.EmailField(unique=True, db_index=True, max_length=255)
+    email = models.EmailField(unique=True, db_index=True, max_length=255, validators=[validate_email])
     username = models.CharField(unique=True, db_index=True, max_length=255)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
