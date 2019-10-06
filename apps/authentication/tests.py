@@ -1,4 +1,3 @@
-import json
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -36,7 +35,7 @@ class UserRegistrationTest(TestCase):
             "password": "pwd"
         }
         response = self.client.post(self.url, data)
-        pwd_err = json.loads(response.content)['password'].pop()
+        pwd_err = response.data['password'].pop()
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual("Ensure this field has at least 8 characters.", pwd_err)
 
@@ -47,7 +46,7 @@ class UserRegistrationTest(TestCase):
             "password": "password"
         }
         response = self.client.post(self.url, data)
-        exists_err = json.loads(response.content)['email'].pop()
+        exists_err = response.data['email'].pop()
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual("user with this email already exists.", exists_err)
 
@@ -58,7 +57,7 @@ class UserRegistrationTest(TestCase):
             "password": "password"
         }
         response = self.client.post(self.url, data)
-        email_err = json.loads(response.content)['email'].pop()
+        email_err = response.data['email'].pop()
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertEqual("This is undeliverable email. Please use another one.", email_err)
 
@@ -80,7 +79,7 @@ class UserLoginTest(TestCase):
         }
         response = self.client.post(self.url, data)
         self.assertEqual(status.HTTP_200_OK, response.status_code)
-        self.assertIn("token", json.loads(response.content))
+        self.assertIn("token", response.data)
 
     def test_login_wrong_credentials(self):
         data = {
@@ -88,7 +87,7 @@ class UserLoginTest(TestCase):
             "password": "password666"
         }
         response = self.client.post(self.url, data)
-        non_field_errors = json.loads(response.content)['non_field_errors']
+        non_field_errors = response.data['non_field_errors']
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertIn("Unable to log in with provided credentials.", non_field_errors)
 
@@ -97,6 +96,6 @@ class UserLoginTest(TestCase):
             "email": "testuser@test.com"
         }
         response = self.client.post(self.url, data)
-        password = json.loads(response.content)['password']
+        password = response.data['password']
         self.assertEqual(status.HTTP_400_BAD_REQUEST, response.status_code)
         self.assertIn("This field is required.", password)
