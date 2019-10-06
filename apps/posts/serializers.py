@@ -27,11 +27,12 @@ class LikeSerializer(serializers.ModelSerializer):
     post = serializers.ReadOnlyField(source='post.id')
     profile = serializers.ReadOnlyField(source='profile.user.email')
     time = serializers.ReadOnlyField(source='updated')
+    liked = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Like
-        fields = ('profile', 'post', 'time')
-        read_only_field = ['time']
+        fields = ('profile', 'post', 'time', 'liked')
+        read_only_field = ['time', 'liked']
         extra_kwargs = {'is_deleted': {'write_only': True}}
 
     def create(self, validated_data):
@@ -46,3 +47,6 @@ class LikeSerializer(serializers.ModelSerializer):
             obj = unlike_post(post_id, profile.id)
 
         return obj
+
+    def get_liked(self, like):
+        return Like.objects.filter(post=like.post, profile=like.profile, is_deleted=False).exists()

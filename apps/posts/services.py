@@ -20,5 +20,5 @@ def unlike_post(post_id, profile_id):
     return like
 
 
-def posts_by_user(user_id):
-    return Post.objects.filter(author__user__id=user_id)
+def filter_posts(**filter_params):
+    return Post.objects.filter(**filter_params)

@@ -1,9 +1,10 @@
-from rest_framework.generics import CreateAPIView, ListCreateAPIView
+from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveDestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from .permissions import IsOwnerOrReadOnly
 from .serializers import PostSerializer, LikeSerializer
-from .services import posts_by_user
+from .services import filter_posts
 
 
 class PostAPIView(ListCreateAPIView):
@@ -11,7 +12,7 @@ class PostAPIView(ListCreateAPIView):
     serializer_class = PostSerializer
 
     def get_queryset(self):
-        return posts_by_user(self.request.user.id)
+        return filter_posts(author__user__id=self.request.user.id)
 
     def post(self, request, *args, **kwargs):
         serializer = self.serializer_class(
@@ -24,6 +25,12 @@ class PostAPIView(ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class PostDetailAPIView(RetrieveDestroyAPIView):
+    permission_classes = (IsAuthenticated, IsOwnerOrReadOnly)
+    serializer_class = PostSerializer
+    queryset = filter_posts()
 
 
 class PostLike(CreateAPIView):
@@ -65,4 +72,4 @@ class PostUnlike(CreateAPIView):
 
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response('Unliked successfully', status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
