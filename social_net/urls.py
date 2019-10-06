@@ -23,5 +23,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('apps.authentication.urls')),
     path('api/', include('apps.posts.urls')),
+    path('api/', include('apps.profiles.urls')),
     path('openapi/', TemplateView.as_view(template_name="index.html")),
 ] + static(settings.STATIC_URL)
