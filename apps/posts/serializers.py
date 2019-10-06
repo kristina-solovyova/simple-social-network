@@ -43,6 +43,6 @@ class LikeSerializer(serializers.ModelSerializer):
         if like:
             obj, created = like_post(post_id, profile.id)
         else:
-            obj = unlike_post(post_id, user_id)
+            obj = unlike_post(post_id, profile.id)
 
         return obj
