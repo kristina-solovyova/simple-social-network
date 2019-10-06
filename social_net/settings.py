@@ -151,3 +151,5 @@ JWT_AUTH = {
     'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
+
+EMAIL_HUNTER_API_KEY = '48314828dc4b7f4d734310c5f1001f4f5bccac5c'
