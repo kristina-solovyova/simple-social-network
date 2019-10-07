@@ -27,9 +27,25 @@ class Profile(models.Model):
         return self.user.username
 
     def follow(self, profile):
-        """Follow `profile` if not already"""
+        """
+        Follow `profile` if not already
+        """
         self.following.add(profile)
 
     def unfollow(self, profile):
-        """Unfollow `profile` if already following."""
+        """
+        Unfollow `profile` if is already following
+        """
         self.following.remove(profile)
+
+    def is_following(self, profile):
+        """
+        Check if current user profile is following `profile`
+        """
+        return self.following.filter(pk=profile.pk).exists()
+
+    def is_followed_by(self, profile):
+        """
+        Check if current user profile is followed by `profile`
+        """
+        return self.followers.filter(pk=profile.pk).exists()

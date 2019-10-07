@@ -1,11 +1,89 @@
 openapi: 3.0.2
 info:
   title: 'Simple social network'
+  description: 'Implementation of simple REST API using Django and Django REST framework.'
   version: '1.0'
+servers:
+  - url: https://social-net-api.herokuapp.com
+    description: ''
+components:
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+tags:
+- name: "auth"
+  description: "User login and sigup"
+- name: "posts"
+  description: "Operations with posts and likes"
+- name: "profile"
+  description: "Operations with user profile"
 paths:
+  /api/posts/{id}:
+    get:
+      security:
+        - jwtAuth: []
+      tags:
+      - "posts"
+      operationId: RetrievePost
+      summary: "Get post by ID"
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this post.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: integer
+                    readOnly: true
+                  text:
+                    type: string
+                  author:
+                    type: string
+                    readOnly: true
+                  created:
+                    type: string
+                    format: date-time
+                    readOnly: true
+                  likes_num:
+                    type: string
+                    readOnly: true
+                required:
+                - text
+          description: ''
+    delete:
+      security:
+        - jwtAuth: []
+      tags:
+      - "posts"
+      operationId: DestroyPost
+      summary: "Delete post by ID"
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this post.
+        schema:
+          type: string
+      responses:
+        '204':
+          description: ''
   /api/posts:
     get:
+      security:
+        - jwtAuth: []
+      tags:
+      - "posts"
       operationId: listPosts
+      summary: "Get posts by curent user"
       parameters:
       - name: page
         required: false
@@ -52,7 +130,12 @@ paths:
                       - text
           description: ''
     post:
+      security:
+        - jwtAuth: []
+      tags:
+      - "posts"
       operationId: CreatePost
+      summary: "Create a new post"
       parameters: []
       requestBody:
         content:
@@ -87,9 +170,144 @@ paths:
                 required:
                 - text
           description: ''
+  /api/profile/{id}:
+    get:
+      security:
+        - jwtAuth: []
+      tags:
+      - "profile"
+      operationId: RetrieveProfile
+      summary: "Get profile info by ID"
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this profile.
+        schema:
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: integer
+                    readOnly: true
+                  user:
+                    type: string
+                    readOnly: true
+                  full_name:
+                    type: string
+                    maxLength: 255
+                  birthday:
+                    type: string
+                    format: date
+                    nullable: true
+                  bio:
+                    type: string
+                  follows_me:
+                    type: string
+                    readOnly: true
+                  am_following:
+                    type: string
+                    readOnly: true
+                  location:
+                    type: string
+                    maxLength: 255
+                  timeZone:
+                    type: string
+                    maxLength: 127
+                  site:
+                    type: string
+                    maxLength: 127
+                  posts_num:
+                    type: string
+                    readOnly: true
+          description: ''
+    put:
+      security:
+        - jwtAuth: []
+      tags:
+      - "profile"
+      operationId: UpdateProfile
+      summary: "Update profile info by ID"
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: A unique integer value identifying this profile.
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                full_name:
+                  type: string
+                  maxLength: 255
+                birthday:
+                  type: string
+                  format: date
+                  nullable: true
+                bio:
+                  type: string
+                location:
+                  type: string
+                  maxLength: 255
+                timeZone:
+                  type: string
+                  maxLength: 127
+                site:
+                  type: string
+                  maxLength: 127
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: integer
+                    readOnly: true
+                  user:
+                    type: string
+                    readOnly: true
+                  full_name:
+                    type: string
+                    maxLength: 255
+                  birthday:
+                    type: string
+                    format: date
+                    nullable: true
+                  bio:
+                    type: string
+                  follows_me:
+                    type: string
+                    readOnly: true
+                  am_following:
+                    type: string
+                    readOnly: true
+                  location:
+                    type: string
+                    maxLength: 255
+                  timeZone:
+                    type: string
+                    maxLength: 127
+                  site:
+                    type: string
+                    maxLength: 127
+                  posts_num:
+                    type: string
+                    readOnly: true
+          description: ''
   /api/login:
     post:
+      tags:
+      - "auth"
       operationId: CreateJWT
+      summary: "Log in with given credentials"
       parameters: []
       requestBody:
         content:
@@ -110,14 +328,17 @@ paths:
             application/json:
               schema:
                 properties:
-                  email:
+                  token:
                     type: string
                 required:
-                - email
+                - token
           description: ''
   /api/signup:
     post:
+      tags:
+      - "auth"
       operationId: CreateUser
+      summary: "Register as a new user"
       parameters: []
       requestBody:
         content:
@@ -166,7 +387,12 @@ paths:
           description: ''
   /api/posts/{id}/like:
     post:
-      operationId: CreateLike
+      security:
+        - jwtAuth: []
+      tags:
+      - "posts"
+      operationId: PostLike
+      summary: "Like post by ID"
       parameters:
       - name: id
         in: path
@@ -192,12 +418,20 @@ paths:
                     type: string
                     readOnly: true
                   time:
+                    type: string
+                    readOnly: true
+                  liked:
                     type: string
                     readOnly: true
           description: ''
   /api/posts/{id}/unlike:
     post:
-      operationId: CreateLike
+      security:
+        - jwtAuth: []
+      tags:
+      - "posts"
+      operationId: PostUnlike
+      summary: "Unlike post by ID"
       parameters:
       - name: id
         in: path
@@ -223,6 +457,163 @@ paths:
                     type: string
                     readOnly: true
                   time:
+                    type: string
+                    readOnly: true
+                  liked:
+                    type: string
+                    readOnly: true
+          description: ''
+  /api/profile/{id}/follow:
+    post:
+      security:
+        - jwtAuth: []
+      tags:
+      - "profile"
+      operationId: FollowProfile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                full_name:
+                  type: string
+                  maxLength: 255
+                birthday:
+                  type: string
+                  format: date
+                  nullable: true
+                bio:
+                  type: string
+                location:
+                  type: string
+                  maxLength: 255
+                timeZone:
+                  type: string
+                  maxLength: 127
+                site:
+                  type: string
+                  maxLength: 127
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: integer
+                    readOnly: true
+                  user:
+                    type: string
+                    readOnly: true
+                  full_name:
+                    type: string
+                    maxLength: 255
+                  birthday:
+                    type: string
+                    format: date
+                    nullable: true
+                  bio:
+                    type: string
+                  follows_me:
+                    type: string
+                    readOnly: true
+                  am_following:
+                    type: string
+                    readOnly: true
+                  location:
+                    type: string
+                    maxLength: 255
+                  timeZone:
+                    type: string
+                    maxLength: 127
+                  site:
+                    type: string
+                    maxLength: 127
+                  posts_num:
+                    type: string
+                    readOnly: true
+          description: ''
+  /api/profile/{id}/unfollow:
+    post:
+      security:
+        - jwtAuth: []
+      tags:
+      - "profile"
+      operationId: UnfollowProfile
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: ''
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                full_name:
+                  type: string
+                  maxLength: 255
+                birthday:
+                  type: string
+                  format: date
+                  nullable: true
+                bio:
+                  type: string
+                location:
+                  type: string
+                  maxLength: 255
+                timeZone:
+                  type: string
+                  maxLength: 127
+                site:
+                  type: string
+                  maxLength: 127
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                properties:
+                  id:
+                    type: integer
+                    readOnly: true
+                  user:
+                    type: string
+                    readOnly: true
+                  full_name:
+                    type: string
+                    maxLength: 255
+                  birthday:
+                    type: string
+                    format: date
+                    nullable: true
+                  bio:
+                    type: string
+                  follows_me:
+                    type: string
+                    readOnly: true
+                  am_following:
+                    type: string
+                    readOnly: true
+                  location:
+                    type: string
+                    maxLength: 255
+                  timeZone:
+                    type: string
+                    maxLength: 127
+                  site:
+                    type: string
+                    maxLength: 127
+                  posts_num:
                     type: string
                     readOnly: true
           description: ''
