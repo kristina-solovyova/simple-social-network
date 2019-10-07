@@ -78,3 +78,42 @@ class PostDetailTest(TestCase):
         url = reverse('post-detail', kwargs={"pk": 666})
         response = self.client.delete(url)
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+
+class LikesTest(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            email='testuser@test.com',
+            username='testuser',
+            password='password'
+        )
+        self.client.force_authenticate(user=self.user)
+        self.post = Post.objects.create(author=self.user.profile, text="Test text #1")
+        self.like_url = reverse('like-post', kwargs={"pk": self.post.pk})
+        self.unlike_url = reverse('unlike-post', kwargs={"pk": self.post.pk})
+
+    def test_post_like(self):
+        response = self.client.post(self.like_url)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(self.post.pk, response.data['post'])
+        self.assertEqual(self.user.email, response.data['profile'])
+        self.assertTrue(response.data['liked'])
+
+    def test_post_like_not_found(self):
+        url = reverse('like-post', kwargs={"pk": 888})
+        response = self.client.post(url)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
+
+    def test_post_unlike(self):
+        self.post.likes.create(profile=self.user.profile)
+        response = self.client.post(self.unlike_url)
+        self.assertEqual(status.HTTP_200_OK, response.status_code)
+        self.assertEqual(self.post.pk, response.data['post'])
+        self.assertEqual(self.user.email, response.data['profile'])
+        self.assertFalse(response.data['liked'])
+
+    def test_post_unlike_not_found(self):
+        url = reverse('unlike-post', kwargs={"pk": 888})
+        response = self.client.post(url)
+        self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
